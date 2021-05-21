@@ -1,0 +1,10 @@
+lane :test do
+	jira_assign(
+	    url: "your_base_jira_url",
+	    username: "your_jira_username",
+	    password: "your_jira_api_token", # You can obtain one at https://id.atlassian.com/manage-profile/security/api-tokens
+	    ticket_id: "ID-1",
+	    status: "1", # You need to somehow obtain your jira status id
+	    assignee: "user_id" # You can find id in link address of user at People page of user (last part of url address)
+	  )
+end
