@@ -7,7 +7,7 @@
 This project is a [_fastlane_](https://github.com/fastlane/fastlane) plugin. To get started with `fastlane-plugin-jira_assign`, add it to your project by adding row to your Pluginfile:
 
 ```
-gem "fastlane-plugin-jira_assign", git: "https://github.com/romabakenbard/fastlane-plugin-jira_assign"
+gem "fastlane-plugin-jira_assign", git: "https://github.com/romabakenbard/fastlane-plugin-jira_assign", branch: "main"
 ```
 
 You need to obtain jira token [here](https://id.atlassian.com/manage-profile/security/api-tokens)
