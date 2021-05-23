@@ -16,7 +16,7 @@ module Fastlane
         ticket_id    = params[:ticket_id]
         status       = params[:status]
         assignee     = params[:assignee]
-
+        comment_text = params[:comment_text]
         
         options = {
                     site: site,
@@ -30,9 +30,6 @@ module Fastlane
           client = JIRA::Client.new(options)
           issue = client.Issue.find(ticket_id)
 
-          # available_transitions = client.Transition.all(:issue => issue)
-          # available_transitions.each {|ea| UI.success("#{ea.name} (id #{ea.id})")}
-
           transition = issue.transitions.build
           transition.save("transition" => {"id" => status})
 
@@ -44,6 +41,15 @@ module Fastlane
           assignee_json_response = issue.attrs
           raise 'Failed to move assignee for Jira ticket' if assignee_json_response.nil?
           UI.success('Successfully moved assignee Jira ticket')
+
+          if comment_text.to_s.length > 0
+            comment = issue.comments.build
+            comment.save({ 'body' => comment_text })
+
+            comment_json_response = comment.attrs
+            raise 'Failed to add a comment on Jira ticket' if comment_json_response.nil?
+            UI.success('Successfully added a comment on Jira ticket')
+          end
           
           return 1
         rescue => exception
@@ -119,6 +125,11 @@ module Fastlane
                                        verify_block: proc do |value|
                                          UI.user_error!("No assignee user specified") if value.to_s.length == 0
                                        end),
+          FastlaneCore::ConfigItem.new(key: :comment_text,
+                                       env_name: "FL_JIRA_COMMENT_TEXT",
+                                       description: "Text to add to the ticket as a comment",
+                                       optional: true,
+                                       default_value: ""),
           FastlaneCore::ConfigItem.new(key: :fail_on_error,
                                        env_name: "FL_JIRA_FAIL_ON_ERROR",
                                        description: "Should an error adding the Jira comment cause a failure?",
