@@ -30,17 +30,31 @@ module Fastlane
           client = JIRA::Client.new(options)
           issue = client.Issue.find(ticket_id)
 
-          transition = issue.transitions.build
-          transition.save("transition" => {"id" => status})
+          current_status_name = issue.status.name
+          current_status_id = 0
 
-          satus_json_response = transition.attrs
-          raise 'Failed to move status for Jira ticket' if satus_json_response.nil?
-          UI.success('Successfully moved status Jira ticket')
+          available_transitions = client.Transition.all(:issue => issue)
+          for ea in available_transitions do
+            if ea.name == current_status_name
+              current_status_id = ea.id
+            end
+          end
 
-          issue.save({'fields' => {'assignee' => {'id' => assignee}}})
-          assignee_json_response = issue.attrs
-          raise 'Failed to move assignee for Jira ticket' if assignee_json_response.nil?
-          UI.success('Successfully moved assignee Jira ticket')
+          if current_status_id != status
+            transition = issue.transitions.build
+            transition.save("transition" => {"id" => status})
+
+            satus_json_response = transition.attrs
+            raise 'Failed to move status for Jira ticket' if satus_json_response.nil?
+            UI.success('Successfully moved status Jira ticket')
+
+            issue.save({'fields' => {'assignee' => {'id' => assignee}}})
+            assignee_json_response = issue.attrs
+            raise 'Failed to move assignee for Jira ticket' if assignee_json_response.nil?
+            UI.success('Successfully moved assignee Jira ticket')
+          else
+            UI.success('Jira ticket already in desired status')
+          end
 
           if comment_text.to_s.length > 0
             comment = issue.comments.build
