@@ -6,7 +6,7 @@ require 'fastlane/plugin/jira_assign/version'
 
 Gem::Specification.new do |spec|
   spec.name          = 'fastlane-plugin-jira_assign'
-  spec.version       = Fastlane::JiraAssign::VERSION
+  spec.version       = 1.1
   spec.author        = 'Roma Bakenbard'
   spec.email         = 'roma.bakenbard@gmail.com'
 
