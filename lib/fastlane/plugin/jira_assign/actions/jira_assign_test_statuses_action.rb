@@ -13,7 +13,7 @@ module Fastlane
         context_path = params[:context_path]
         username     = params[:username]
         password     = params[:password]
-        ticket_id    = params[:ticket_id]
+        ticket_ids   = params[:ticket_ids]
         
         options = {
                     site: site,
@@ -25,10 +25,27 @@ module Fastlane
 
         begin
           client = JIRA::Client.new(options)
-          issue = client.Issue.find(ticket_id)
+          client.Field.map_fields
 
-          available_transitions = client.Transition.all(:issue => issue)
-          available_transitions.each {|ea| UI.success("#{ea.name} (id #{ea.id})")}
+          tickets_list = ticket_ids.split(",")
+
+          for ticket_id in tickets_list do
+            begin
+              issue = client.Issue.find(ticket_id)
+
+              begin
+                reviewer_id = issue.Reviewer['accountId']
+                UI.message("Reviewr is #{reviewer_id}")
+              rescue => ex
+                UI.message("Task has no reviewer")
+              end
+
+              available_transitions = client.Transition.all(:issue => issue)
+              available_transitions.each {|ea| UI.success("#{ea.name} (id #{ea.id})")}
+            rescue => ex
+              UI.message("Fail to get task #{ex}")
+            end
+          end
           
           return 1
         rescue => exception
@@ -86,11 +103,11 @@ module Fastlane
                                        verify_block: proc do |value|
                                          UI.user_error!("No password") if value.to_s.length == 0
                                        end),
-          FastlaneCore::ConfigItem.new(key: :ticket_id,
-                                       env_name: "FL_JIRA_TICKET_ID",
-                                       description: "Ticket ID for Jira, i.e. IOS-123",
+          FastlaneCore::ConfigItem.new(key: :ticket_ids,
+                                       env_name: "FL_JIRA_TICKET_IDS",
+                                       description: "Ticket IDs for Jira, i.e. IOS-123",
                                        verify_block: proc do |value|
-                                         UI.user_error!("No Ticket specified") if value.to_s.length == 0
+                                         UI.user_error!("No Tickets specified") if value.to_s.length == 0
                                        end),
           FastlaneCore::ConfigItem.new(key: :fail_on_error,
                                        env_name: "FL_JIRA_FAIL_ON_ERROR",

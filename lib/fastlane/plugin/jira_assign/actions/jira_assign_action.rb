@@ -13,7 +13,7 @@ module Fastlane
         context_path = params[:context_path]
         username     = params[:username]
         password     = params[:password]
-        ticket_id    = params[:ticket_id]
+        ticket_ids   = params[:ticket_ids]
         status       = params[:status]
         assignee     = params[:assignee]
         comment_text = params[:comment_text]
@@ -28,41 +28,59 @@ module Fastlane
 
         begin
           client = JIRA::Client.new(options)
-          issue = client.Issue.find(ticket_id)
+          client.Field.map_fields
 
-          current_status_name = issue.status.name
-          current_status_id = 0
+          tickets_list = ticket_ids.split(",")
+          for ticket_id in tickets_list do
+            begin
+              issue = client.Issue.find(ticket_id)
 
-          available_transitions = client.Transition.all(:issue => issue)
-          for ea in available_transitions do
-            if ea.name == current_status_name
-              current_status_id = ea.id
+              current_status_name = issue.status.name
+              current_status_id = 0
+
+              available_transitions = client.Transition.all(:issue => issue)
+              for ea in available_transitions do
+                if ea.name == current_status_name
+                  current_status_id = ea.id
+                end
+              end
+
+              correct_assignee = assignee
+
+              begin
+                reviewer_id = issue.Reviewer['accountId']
+                correct_assignee = reviewer_id
+              rescue => ex
+                UI.message("Task has no reviewer")
+              end
+
+              if current_status_id != status
+                transition = issue.transitions.build
+                transition.save("transition" => {"id" => status})
+
+                satus_json_response = transition.attrs
+                raise 'Failed to move status for Jira ticket' if satus_json_response.nil?
+                UI.success('Successfully moved status Jira ticket')
+
+                issue.save({'fields' => {'assignee' => {'id' => correct_assignee}}})
+                assignee_json_response = issue.attrs
+                raise 'Failed to move assignee for Jira ticket' if assignee_json_response.nil?
+                UI.success('Successfully moved assignee Jira ticket')
+              else
+                UI.success('Jira ticket already in desired status')
+              end
+
+              if comment_text.to_s.length > 0
+                comment = issue.comments.build
+                comment.save({ 'body' => comment_text })
+
+                comment_json_response = comment.attrs
+                raise 'Failed to add a comment on Jira ticket' if comment_json_response.nil?
+                UI.success('Successfully added a comment on Jira ticket')
+              end
+            rescue => ex
+              UI.message("Fail to update task #{ex}")
             end
-          end
-
-          if current_status_id != status
-            transition = issue.transitions.build
-            transition.save("transition" => {"id" => status})
-
-            satus_json_response = transition.attrs
-            raise 'Failed to move status for Jira ticket' if satus_json_response.nil?
-            UI.success('Successfully moved status Jira ticket')
-
-            issue.save({'fields' => {'assignee' => {'id' => assignee}}})
-            assignee_json_response = issue.attrs
-            raise 'Failed to move assignee for Jira ticket' if assignee_json_response.nil?
-            UI.success('Successfully moved assignee Jira ticket')
-          else
-            UI.success('Jira ticket already in desired status')
-          end
-
-          if comment_text.to_s.length > 0
-            comment = issue.comments.build
-            comment.save({ 'body' => comment_text })
-
-            comment_json_response = comment.attrs
-            raise 'Failed to add a comment on Jira ticket' if comment_json_response.nil?
-            UI.success('Successfully added a comment on Jira ticket')
           end
           
           return 1
@@ -121,11 +139,11 @@ module Fastlane
                                        verify_block: proc do |value|
                                          UI.user_error!("No password") if value.to_s.length == 0
                                        end),
-          FastlaneCore::ConfigItem.new(key: :ticket_id,
-                                       env_name: "FL_JIRA_TICKET_ID",
-                                       description: "Ticket ID for Jira, i.e. IOS-123",
+          FastlaneCore::ConfigItem.new(key: :ticket_ids,
+                                       env_name: "FL_JIRA_TICKET_IDs",
+                                       description: "Ticket IDs for Jira, i.e. IOS-123. You can pass a multiple ids, use comma as delimeter, i.e. IOS-123,IOS-345,IOS-456",
                                        verify_block: proc do |value|
-                                         UI.user_error!("No Ticket specified") if value.to_s.length == 0
+                                         UI.user_error!("No Tickets specified") if value.to_s.length == 0
                                        end),
           FastlaneCore::ConfigItem.new(key: :status,
                                        env_name: "FL_JIRA_STATUS_ID",

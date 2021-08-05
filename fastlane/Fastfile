@@ -3,7 +3,7 @@ lane :test do
 		url: "your_base_jira_url",
 		username: "your_jira_username",
 		password: "your_jira_api_token", # You can obtain one at https://id.atlassian.com/manage-profile/security/api-tokens
-		ticket_id: "ID-1",
+		ticket_ids: "ID-1,ID-2,ID-3",
 		status: "1", # You need to somehow obtain your jira status id (you can use action "jira_assign_test_statuses")
 		assignee: "user_id", # You can find id in link address of user at People page of user (last part of url address)
 		comment_text: "Comment text" # You can optionaly provide comment text with build number or whatever you want
@@ -13,6 +13,6 @@ lane :test do
 		url: "your_base_jira_url",
 		username: "your_jira_username",
 		password: "your_jira_api_token", # You can obtain one at https://id.atlassian.com/manage-profile/security/api-tokens
-		ticket_id: "ID-1"
+		ticket_ids: "ID-1,ID-2,ID-3"
 	)
 end
