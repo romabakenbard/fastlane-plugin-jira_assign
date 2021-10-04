@@ -17,6 +17,8 @@ module Fastlane
         status       = params[:status]
         assignee     = params[:assignee]
         comment_text = params[:comment_text]
+        custom_field_text = params[:custom_field_text]
+        custom_field_name = params[:custom_field_name]
         
         options = {
                     site: site,
@@ -77,6 +79,13 @@ module Fastlane
                 comment_json_response = comment.attrs
                 raise 'Failed to add a comment on Jira ticket' if comment_json_response.nil?
                 UI.success('Successfully added a comment on Jira ticket')
+              end
+
+              if custom_field_text.to_s.length > 0 && custom_field_name.to_s.length > 0
+                issue.save({'fields' => {custom_field_name => custom_field_text}})
+                comment_json_response = issue.attrs
+                raise 'Failed to add a build links on Jira ticket' if comment_json_response.nil?
+                UI.success('Successfully added a build links on Jira ticket')
               end
             rescue => ex
               UI.message("Fail to update task #{ex}")
@@ -160,6 +169,16 @@ module Fastlane
           FastlaneCore::ConfigItem.new(key: :comment_text,
                                        env_name: "FL_JIRA_COMMENT_TEXT",
                                        description: "Text to add to the ticket as a comment",
+                                       optional: true,
+                                       default_value: ""),
+          FastlaneCore::ConfigItem.new(key: :custom_field_text,
+                                       env_name: "FL_JIRA_CUSTOM_FIELD_TEXT",
+                                       description: "Text to add to the ticket as a custom field",
+                                       optional: true,
+                                       default_value: ""),
+          FastlaneCore::ConfigItem.new(key: :custom_field_name,
+                                       env_name: "FL_JIRA_CUSTOM_FIELD_NAME",
+                                       description: "Name of custom field to add text to the ticket",
                                        optional: true,
                                        default_value: ""),
           FastlaneCore::ConfigItem.new(key: :fail_on_error,
