@@ -56,7 +56,7 @@ module Fastlane
                 UI.message("Task has no reviewer")
               end
 
-              if issue.status.name == "Done" || issue.status.name == "Won't Do" || issue.status.name == "In Review"
+              if issue.status.name == "Done" || issue.status.name == "Won't Do"
                 UI.success('Jira ticket already closed')
                 next
               elsif current_status_id != status
