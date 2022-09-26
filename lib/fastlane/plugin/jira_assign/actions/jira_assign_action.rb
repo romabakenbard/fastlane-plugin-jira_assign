@@ -56,7 +56,10 @@ module Fastlane
                 UI.message("Task has no reviewer")
               end
 
-              if current_status_id != status
+              if issue.status.name == "Done" || issue.status.name == "Won't Do"
+                UI.success('Jira ticket already closed')
+                next
+              elsif current_status_id != status
                 transition = issue.transitions.build
                 transition.save("transition" => {"id" => status})
 
@@ -70,6 +73,7 @@ module Fastlane
                 UI.success('Successfully moved assignee Jira ticket')
               else
                 UI.success('Jira ticket already in desired status')
+                next
               end
 
               if comment_text.to_s.length > 0
