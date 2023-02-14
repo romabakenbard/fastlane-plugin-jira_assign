@@ -49,11 +49,11 @@ module Fastlane
 
               correct_assignee = assignee
 
-              begin
-                reviewer_id = issue.Reviewer['accountId']
-                correct_assignee = reviewer_id
-              rescue => ex
-                UI.message("Task has no reviewer")
+              if custom_field_text.to_s.length > 0 && custom_field_name.to_s.length > 0
+                issue.save({'fields' => {custom_field_name => custom_field_text}})
+                comment_json_response = issue.attrs
+                raise 'Failed to add a build links on Jira ticket' if comment_json_response.nil?
+                UI.success('Successfully added a build links on Jira ticket')
               end
 
               if issue.status.name == "Done" || issue.status.name == "Won't Do"
@@ -83,13 +83,6 @@ module Fastlane
                 comment_json_response = comment.attrs
                 raise 'Failed to add a comment on Jira ticket' if comment_json_response.nil?
                 UI.success('Successfully added a comment on Jira ticket')
-              end
-
-              if custom_field_text.to_s.length > 0 && custom_field_name.to_s.length > 0
-                issue.save({'fields' => {custom_field_name => custom_field_text}})
-                comment_json_response = issue.attrs
-                raise 'Failed to add a build links on Jira ticket' if comment_json_response.nil?
-                UI.success('Successfully added a build links on Jira ticket')
               end
             rescue => ex
               UI.message("Fail to update task #{ex}")
