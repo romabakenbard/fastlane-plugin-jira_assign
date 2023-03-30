@@ -47,6 +47,10 @@ module Fastlane
                 end
               end
 
+              UI.message("@@@ issue.status = /#{issue.status}/")
+              UI.message("@@@ issue.status.name = /#{issue.status.name}/")
+              UI.message("@@@ if result = /#{["Done", "Ready for merge", "Won't do"].include?(issue.status.name)}/")
+
               if ["Done", "Ready for merge", "Won't do"].include?(issue.status.name)
                 UI.success("Jira ticket status (#{issue.status.name}) is untouchable")
                 next
