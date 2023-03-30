@@ -47,6 +47,11 @@ module Fastlane
                 end
               end
 
+              if ["Done", "Ready for merge", "Won't do"].include?(issue.status.name)
+                UI.success("Jira ticket status (#{issue.status.name}) is untouchable")
+                next
+              end
+
               correct_assignee = assignee
 
               if custom_field_text.to_s.length > 0 && custom_field_name.to_s.length > 0
@@ -56,10 +61,7 @@ module Fastlane
                 UI.success('Successfully added a build links on Jira ticket')
               end
 
-              if issue.status.name == "Done" || issue.status.name == "Won't Do"
-                UI.success('Jira ticket already closed')
-                next
-              elsif current_status_id != status
+              if current_status_id != status
                 transition = issue.transitions.build
                 transition.save("transition" => {"id" => status})
 
