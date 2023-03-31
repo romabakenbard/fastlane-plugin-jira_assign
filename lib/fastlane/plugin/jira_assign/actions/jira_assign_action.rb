@@ -49,12 +49,12 @@ module Fastlane
 
               UI.message("Jira ticket #{issue.key} with status name #{issue.status.name} and id #{issue.status.id} found")
 
-              untouchable_status_ids = [
-                "10001", # Done
-                "10492", # Ready for merge
-                "10301" # Won't do
-              ]
-              if untouchable_status_ids.include?(issue.status.id)
+              untouchable_statuses = [
+                "Done",
+                "Ready for merge",
+                "Won't do"
+              ].map { |item| item.downcase }
+              if untouchable_statuses.include?(issue.status.name.downcase)
                 UI.success("Jira ticket status #{issue.status.name} with id #{issue.status.id} is untouchable")
                 next
               end
