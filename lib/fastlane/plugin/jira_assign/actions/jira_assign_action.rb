@@ -32,7 +32,7 @@ module Fastlane
           client = JIRA::Client.new(options)
           client.Field.map_fields
 
-          tickets_list = ticket_ids.split(",")
+          tickets_list = ticket_ids.split(",").uniq
           for ticket_id in tickets_list do
             begin
               issue = client.Issue.find(ticket_id)
@@ -47,8 +47,15 @@ module Fastlane
                 end
               end
 
-              if ["Done", "Ready for merge", "Won't do"].include?(issue.status.name)
-                UI.success("Jira ticket status (#{issue.status.name}) is untouchable")
+              UI.message("Jira ticket #{issue.key} with status name #{issue.status.name} and id #{issue.status.id} found")
+
+              untouchable_statuses = [
+                "Done",
+                "Ready for merge",
+                "Won't do"
+              ].map { |item| item.downcase }
+              if untouchable_statuses.include?(issue.status.name.downcase)
+                UI.success("Jira ticket status #{issue.status.name} with id #{issue.status.id} is untouchable")
                 next
               end
 
