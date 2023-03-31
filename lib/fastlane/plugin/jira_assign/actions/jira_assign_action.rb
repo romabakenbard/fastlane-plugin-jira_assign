@@ -32,7 +32,7 @@ module Fastlane
           client = JIRA::Client.new(options)
           client.Field.map_fields
 
-          tickets_list = ticket_ids.split(",")
+          tickets_list = ticket_ids.split(",").uniq
           for ticket_id in tickets_list do
             begin
               issue = client.Issue.find(ticket_id)
@@ -47,7 +47,7 @@ module Fastlane
                 end
               end
 
-              UI.message("Jira ticket #{issue} with status name #{issue.status.name} and id #{issue.status.id} found")
+              UI.message("Jira ticket #{issue.key} with status name #{issue.status.name} and id #{issue.status.id} found")
 
               untouchable_status_ids = [
                 "10001", # Done
