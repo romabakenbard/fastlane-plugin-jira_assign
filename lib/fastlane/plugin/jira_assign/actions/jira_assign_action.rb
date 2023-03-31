@@ -47,7 +47,7 @@ module Fastlane
                 end
               end
 
-              UI.message("Jira ticket with status name #{issue.status.name} and id #{issue.status.id} found")
+              UI.message("Jira ticket #{issue} with status name #{issue.status.name} and id #{issue.status.id} found")
 
               untouchable_status_ids = [
                 "10001", # Done
