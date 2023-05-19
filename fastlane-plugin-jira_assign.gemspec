@@ -11,7 +11,6 @@ Gem::Specification.new do |spec|
   spec.email         = 'roma.bakenbard@gmail.com'
 
   spec.summary       = 'Simple plugin to change jira issue asign and move to status'
-  # spec.homepage      = "https://github.com/<GITHUB_USERNAME>/fastlane-plugin-jira_assign"
   spec.license       = "MIT"
 
   spec.files         = Dir["lib/**/*"] + %w(README.md LICENSE)
@@ -21,7 +20,7 @@ Gem::Specification.new do |spec|
   # Don't add a dependency to fastlane or fastlane_re
   # since this would cause a circular dependency
 
-  # spec.add_dependency 'your-dependency', '~> 1.0.0'
+  spec.add_dependency('jira-ruby')
 
   spec.add_development_dependency('pry')
   spec.add_development_dependency('bundler')
