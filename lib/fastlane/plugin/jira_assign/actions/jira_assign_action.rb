@@ -52,7 +52,8 @@ module Fastlane
               untouchable_statuses = [
                 "Done",
                 "Ready for merge",
-                "Won't do"
+                "Won't do",
+                "In Design Review"
               ].map { |item| item.downcase }
               if untouchable_statuses.include?(issue.status.name.downcase)
                 UI.success("Jira ticket status #{issue.status.name} with id #{issue.status.id} is untouchable")
