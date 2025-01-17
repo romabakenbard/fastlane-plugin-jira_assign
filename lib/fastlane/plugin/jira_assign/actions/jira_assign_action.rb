@@ -60,8 +60,6 @@ module Fastlane
                 next
               end
 
-              correct_assignee = assignee
-
               if custom_field_text.to_s.length > 0 && custom_field_name.to_s.length > 0
                 issue.save({'fields' => {custom_field_name => custom_field_text}})
                 comment_json_response = issue.attrs
@@ -76,14 +74,16 @@ module Fastlane
                 satus_json_response = transition.attrs
                 raise 'Failed to move status for Jira ticket' if satus_json_response.nil?
                 UI.success('Successfully moved status Jira ticket')
-
-                issue.save({'fields' => {'assignee' => {'id' => correct_assignee}}})
-                assignee_json_response = issue.attrs
-                raise 'Failed to move assignee for Jira ticket' if assignee_json_response.nil?
-                UI.success('Successfully moved assignee Jira ticket')
               else
                 UI.success('Jira ticket already in desired status')
                 next
+              end
+
+              if assignee.to_s.length > 0
+                issue.save({'fields' => {'assignee' => {'id' => assignee}}})
+                assignee_json_response = issue.attrs
+                raise 'Failed to move assignee for Jira ticket' if assignee_json_response.nil?
+                UI.success('Successfully moved assignee Jira ticket')
               end
 
               if comment_text.to_s.length > 0
@@ -170,9 +170,8 @@ module Fastlane
           FastlaneCore::ConfigItem.new(key: :assignee,
                                        env_name: "FL_JIRA_ASSIGNEE_NAME",
                                        description: "Name of user to assignee",
-                                       verify_block: proc do |value|
-                                         UI.user_error!("No assignee user specified") if value.to_s.length == 0
-                                       end),
+                                       optional: true,
+                                       default_value: ""),
           FastlaneCore::ConfigItem.new(key: :comment_text,
                                        env_name: "FL_JIRA_COMMENT_TEXT",
                                        description: "Text to add to the ticket as a comment",
